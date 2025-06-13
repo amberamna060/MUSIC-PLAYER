@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Modern Music Player</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --clr-bg: #66e496;
+      --clr-primary: #756161;
+      --clr-text-primary: #fffbfc;
+      --clr-text-secondary: #6b7280;
+      --clr-shadow: rgb(9, 177, 243);
+      --transition-speed: 0.3s;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: var(--clr-bg);
+      color: var(--clr-text-primary);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
+      text-align: center;
+    }
+    .player-container {
+      max-width: 600px;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px var(--clr-shadow);
+      background: black;
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr auto;
+      gap: 1.5rem;
+      padding: 2rem 2.5rem;
+    }
+    .now-playing-info {
+      text-align: center;
+      user-select: none;
+    }
+    .song-title {
+      font-weight: 600;
+      font-size: 1.75rem;
+      margin: 0;
+      color: var(--clr-text-primary);
+    }
+    .song-artist {
+      font-weight: 400;
+      font-size: 1rem;
+      margin-top: 0.3rem;
+      color: var(--clr-text-secondary);
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      user-select: none;
+    }
+    button.control-btn {
+      background: var(--clr-bg);
+      border: none;
+      cursor: pointer;
+      font-size: 1.25rem;
+      padding: 0.6rem;
+      border-radius: 50%;
+      box-shadow: 0 3px 8px var(--clr-shadow);
+      color: var(--clr-primary);
+      transition:
+       background var(--transition-speed),
+        color var(--transition-speed),
+        transform var(--transition-speed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+    }
+    button.control-btn:hover,
+    button.control-btn:focus {
+      background: var(--clr-primary);
+      color: #050505;
+      outline: none;
+      transform: scale(1.1);
+      box-shadow: 0 6px 12px wheat;
+    }
+    .play-pause-btn {
+      font-size: 1.6rem;
+      width: 56px;
+      height: 56px;
+    }
+    .progress-container {
+      width: 100%;
+      height: 10px;
+      background:WHITE ;
+      border-radius: 5px;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      margin: 0 auto;
+    }
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: var(--clr-primary);
+      border-radius: 5px;
+      transition: width 0.2s ease;
+    }
+    .time-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      color: var(--clr-text-secondary);
+      user-select: none;
+      margin-top: 0.3rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .volume-container {
+      margin-top: 1rem;
+      user-select: none;
+    }
+    input[type="range"].volume-slider {
+      width: 100%;
+      -webkit-appearance: none;
+      background:wheat;
+      height: 6px;
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+      box-shadow: inset 0 1px 3px rgb(255, 254, 255);
+      transition: background-color 0.3s ease;
+    }
+    input[type="range"].volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--clr-primary);
+      cursor: pointer;
+      box-shadow: 0 2px 5px palevioletred;
+      transition: background-color 0.3s ease;
+      margin-top: -5px;
+    }
+    input[type="range"].volume-slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--clr-primary);
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(59, 130, 246, 0.6);
+      transition: background-color 0.3s ease;
+    }
+    .playlist-container {
+      margin-top: 1.5rem;
+      max-height: 280px;
+      overflow-y: auto;
+      border-radius: 12px;
+      background: var(--clr-bg);
+      box-shadow: 0 4px 12px white;
+      padding: 1rem 1.5rem;
+      user-select: none;
+    background-color:wheat;
+    }
+    .playlist-item {
+      padding: 0.8rem 0;
+      border-bottom: 1px solid #e5e7eb;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--clr-text-secondary);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .playlist-item:last-child {
+      border-bottom: none;
+    }
+    .playlist-item:hover,
+    .playlist-item.active {
+      background: var(--clr-primary);
+      color: #000000;
+      border-radius: 8px;
+    }
+    .playlist-song-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+    .playlist-song-title {
+      font-weight: 600;
+      font-size: 1rem;
+      margin: 0;
+    }
+    .playlist-song-artist {
+      font-weight: 400;
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .player-container {
+        padding: 1.5rem 1.75rem;
+      }
+      .song-title {
+        font-size: 1.5rem;
+      }
+      .controls {
+        gap: 1rem;
+      }
+      button.control-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+      }
+      .play-pause-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 1.35rem;
+      }
+      .playlist-container {
+        max-height: 200px;
+        padding: 0.75rem 1rem;
+      }
+      .playlist-item {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="player-container" role="region" aria-label="Music Player">
+    <B> <B> <h2>🎵 MUSIC PLAYER</h2></B></B>
+    <section class="now-playing-info" aria-live="polite" aria-atomic="true">
+      <h2 class="song-title" id="song-title">Loading...</h2>
+      <p class="song-artist" id="song-artist">&nbsp;</p>
+    </section>
+    <section class="controls" aria-label="Playback Controls">
+      <button class="control-btn" id="prev-btn" aria-label="Previous song" title="Previous song" type="button" tabindex="0">
+        &#9664;&#9664;
+      </button>
+      <button class="control-btn play-pause-btn" id="play-pause-btn" aria-label="Play" title="Play" type="button" tabindex="0">
+        &#9654;
+      </button>
+      <button class="control-btn" id="next-btn" aria-label="Next song" title="Next song" type="button" tabindex="0">
+        &#9654;&#9654;
+      </button>
+    </section>
+
+    <section class="progress-wrapper" aria-label="Audio progress control" style="user-select:none;">
+      <div class="progress-container" id="progress-container" tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Seek through track"></div>
+      <div class="time-info" aria-hidden="true">
+        <span id="current-time">0:00</span>
+        <span id="duration">0:00</span>
+      </div>
+    </section>
+
+    <section class="volume-container" aria-label="Volume control">
+      <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" aria-valuemin="0" aria-valuemax="1" aria-valuenow="1" aria-label="Volume" />
+    </section>
+
+    <section class="playlist-container" aria-label="Playlist">
+    </section>
+  </div>
+  <audio id="audio"></audio>
+  <script>
+    const songs = [
+      {
+        title: "Sunny",
+        artist: "Bensound",
+        url: "https://www.bensound.com/bensound-music/bensound-sunny.mp3"
+      },
+      {
+        title: "Energy",
+        artist: "Bensound",
+        url: "https://www.bensound.com/bensound-music/bensound-energy.mp3"
+      },
+      {
+        title: "Once Again",
+        artist: "Bensound",
+        url: "https://www.bensound.com/bensound-music/bensound-onceagain.mp3"
+      },
+      {
+        title: "Jazz Comedy",
+        artist: "Bensound",
+        url: "https://www.bensound.com/bensound-music/bensound-jazzcomedy.mp3"
+      },
+      {
+        title: "Punky",
+        artist: "Bensound",
+        url: "https://www.bensound.com/bensound-music/bensound-punky.mp3"
+      },
+      {
+        title: "Going Higher",
+        artist: "Bensound",
+        url: "https://www.bensound.com/bensound-music/bensound-goinghigher.mp3"
+      },
+      {
+        title: "Better Days",
+        artist: "Bensound",
+        url: "https://www.bensound.com/bensound-music/bensound-betterdays.mp3"
+      },
+      {
+        title: "Creative Minds",
+        artist: "Bensound",
+        url: "https://www.bensound.com/bensound-music/bensound-creativeminds.mp3"
+      },
+      {
+        title: "Happy Rock",
+        artist: "Bensound",
+        url: "https://www.bensound.com/bensound-music/bensound-happyrock.mp3"
+      },
+      {
+        title: "Dubstep",
+        artist: "Bensound",
+        url: "https://www.bensound.com/bensound-music/bensound-dubstep.mp3"
+      },
+      {
+        title: "Hip Jazz",
+        artist: "Bensound",
+        url: "https://www.bensound.com/bensound-music/bensound-hipjazz.mp3"
+      },
+      {
+        title: "Little Idea",
+        artist: "Bensound",
+        url: "https://www.bensound.com/bensound-music/bensound-littleidea.mp3"
+      },
+      {
+        title: "Moose",
+        artist: "Bensound",
+        url: "https://www.bensound.com/bensound-music/bensound-moose.mp3"
+      },
+      {
+        title: "Summer",
+        artist: "Bensound",
+        url: "https://www.bensound.com/bensound-music/bensound-summer.mp3"
+      }
+    ];
+
+    // Elements
+    const audio = document.getElementById('audio');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const songTitle = document.getElementById('song-title');
+    const songArtist = document.getElementById('song-artist');
+    const progressContainer = document.getElementById('progress-container');
+    const progress = document.createElement('div');
+    progress.classList.add('progress');
+    progressContainer.appendChild(progress);
+    const currentTimeEl = document.getElementById('current-time');
+    const durationEl = document.getElementById('duration');
+    const volumeSlider = document.getElementById('volume-slider');
+    const playlistContainer = document.querySelector('.playlist-container');
+
+    let currentSongIndex = 0;
+    let isPlaying = false;
+
+    function loadSong(index) {
+      const song = songs[index];
+      audio.src = song.url;
+      songTitle.textContent = song.title;
+      songArtist.textContent = song.artist;
+      updateActivePlaylist();
+    }
+
+    function playSong() {
+      audio.play();
+      isPlaying = true;
+      playPauseBtn.innerHTML = '&#9208;'; // Pause icon
+      playPauseBtn.setAttribute('aria-label', 'Pause');
+      playPauseBtn.title = 'Pause';
+    }
+
+    function pauseSong() {
+      audio.pause();
+      isPlaying = false;
+      playPauseBtn.innerHTML = '&#9654;'; // Play icon
+      playPauseBtn.setAttribute('aria-label', 'Play');
+      playPauseBtn.title = 'Play';
+    }
+
+    function togglePlayPause() {
+      if (isPlaying) {
+        pauseSong();
+      } else {
+        playSong();
+      }
+    }
+
+    function prevSong() {
+      currentSongIndex--;
+      if (currentSongIndex < 0) {
+        currentSongIndex = songs.length - 1;
+      }
+      loadSong(currentSongIndex);
+      playSong();
+    }
+
+    function nextSong() {
+      currentSongIndex++;
+      if (currentSongIndex >= songs.length) {
+        currentSongIndex = 0;
+      }
+      loadSong(currentSongIndex);
+      playSong();
+    }
+
+    function updateProgress() {
+      if (audio.duration) {
+        const progressPercent = (audio.currentTime / audio.duration) * 100;
+        progress.style.width = progressPercent + '%';
+
+        currentTimeEl.textContent = formatTime(audio.currentTime);
+        durationEl.textContent = formatTime(audio.duration);
+        
+        // Update aria-valuenow for progress container slider
+        let val = Math.floor((audio.currentTime / audio.duration) * 100);
+        progressContainer.setAttribute('aria-valuenow', val);
+      }
+    }
+
+    function setProgress(e) {
+      const width = progressContainer.clientWidth;
+      const clickX = e.offsetX;
+      const duration = audio.duration;
+
+      audio.currentTime = (clickX / width) * duration;
+    }
+
+    function formatTime(time) {
+      const minutes = Math.floor(time / 60) || 0;
+      const seconds = Math.floor(time % 60) || 0;
+      return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
+
+    function changeVolume(e) {
+      audio.volume = e.target.value;
+      volumeSlider.setAttribute('aria-valuenow', audio.volume.toFixed(2));
+    }
+
+    function createPlaylist() {
+      songs.forEach((song, index) => {
+        const item = document.createElement('div');
+        item.classList.add('playlist-item');
+        item.setAttribute('tabindex', '0');
+        item.setAttribute('role', 'button');
+        item.setAttribute('aria-pressed', 'false');
+        item.setAttribute('data-index', index);
+        item.title = `${song.title} by ${song.artist}`;
+
+        const songInfo = document.createElement('div');
+        songInfo.classList.add('playlist-song-info');
+
+        const titleEl = document.createElement('p');
+        titleEl.classList.add('playlist-song-title');
+        titleEl.textContent = song.title;
+
+        const artistEl = document.createElement('p');
+        artistEl.classList.add('playlist-song-artist');
+        artistEl.textContent = song.artist;
+
+        songInfo.appendChild(titleEl);
+        songInfo.appendChild(artistEl);
+
+        item.appendChild(songInfo);
+
+        item.addEventListener('click', () => {
+          currentSongIndex = index;
+          loadSong(currentSongIndex);
+          playSong();
+          scrollToItem(index);
+        });
+
+        item.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            item.click();
+          }
+        });
+
+        playlistContainer.appendChild(item);
+      });
+    }
+
+    function updateActivePlaylist() {
+      const items = playlistContainer.querySelectorAll('.playlist-item');
+      items.forEach(item => {
+        item.classList.remove('active');
+        item.setAttribute('aria-pressed', 'false');
+      });
+      const currentItem = playlistContainer.querySelector(`.playlist-item[data-index="${currentSongIndex}"]`);
+      if(currentItem) {
+        currentItem.classList.add('active');
+        currentItem.setAttribute('aria-pressed', 'true');
+      }
+    }
+
+    function scrollToItem(index) {
+      const item = playlistContainer.querySelector(`.playlist-item[data-index="${index}"]`);
+      if (item) {
+        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    // Event Listeners
+    playPauseBtn.addEventListener('click', togglePlayPause);
+    prevBtn.addEventListener('click', prevSong);
+    nextBtn.addEventListener('click', nextSong);
+    audio.addEventListener('timeupdate', updateProgress);
+    progressContainer.addEventListener('click', setProgress);
+    volumeSlider.addEventListener('input', changeVolume);
+    audio.addEventListener('ended', nextSong);
+
+    // Keyboard accessibility: allow seeking with left/right arrows on progress container
+    progressContainer.addEventListener('keydown', (e) => {
+      if (audio.duration) {
+        const step = audio.duration / 20; // 5% increment
+        if(e.key === 'ArrowRight') {
+          e.preventDefault();
+          audio.currentTime = Math.min(audio.currentTime + step, audio.duration);
+        } else if(e.key === 'ArrowLeft') {
+          e.preventDefault();
+          audio.currentTime = Math.max(audio.currentTime - step, 0);
+        }
+      }
+    });
+
+    // Initialize
+    createPlaylist();
+    loadSong(currentSongIndex);
+    volumeSlider.value = 1;
+    audio.volume = 1;
+  </script>
+</body>
+</html>
+
